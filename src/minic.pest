@@ -1,0 +1,65 @@
+// micko-peg - miniC compiler implementation that uses PEG parser
+// Copyright (C) 2020 Bojan Stipic
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+WHITESPACE = _{ " " | "\t" | NEWLINE }
+COMMENT = _{ "//" ~ (!NEWLINE ~ ANY)* }
+
+program = _{ SOI ~ function+ ~ EOI }
+
+function = { TYPE ~ ID ~ "(" ~ parameter? ~ ")" ~ body }
+parameter = { TYPE ~ ID }
+body = { "{" ~ variable* ~ statement* ~ "}" }
+
+variable = { TYPE ~ ID ~ ";" }
+
+statement = _{
+    compound_statement
+    | assignment_statement
+    | if_statement
+    | return_statement
+}
+
+compound_statement = { "{" ~ statement* ~ "}" }
+
+assignment_statement = { ID ~ "=" ~ num_exp ~ ";" }
+num_exp = { exp ~ (AROP ~ exp)* }
+exp = {
+    function_call
+    | literal
+    | ID
+    | ("(" ~ num_exp ~ ")")
+}
+literal = { UINT_NUMBER | INT_NUMBER }
+function_call = { ID ~ "(" ~ num_exp? ~ ")" }
+
+if_statement = { "if" ~ "(" ~ rel_exp ~ ")" ~ statement ~ ("else" ~ statement)? }
+rel_exp = { num_exp ~ RELOP ~ num_exp }
+
+return_statement = { "return" ~ num_exp ~ ";" }
+
+TYPE = @{ "int" | "unsigned" }
+AROP = @{ "+" | "-" }
+RELOP = @{
+    "<="
+    | ">="
+    | "=="
+    | "!="
+    | "<"
+    | ">"
+}
+ID = @{ ASCII_ALPHA_LOWER ~ ASCII_ALPHA* }
+INT_NUMBER = @{ ("+" | "-")? ~ ASCII_DIGIT+ }
+UINT_NUMBER = @{ ASCII_DIGIT+ ~ ^"u" }
