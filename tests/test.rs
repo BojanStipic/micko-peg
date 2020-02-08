@@ -38,7 +38,7 @@ fn test_ok() -> Result<(), Box<dyn Error>> {
     let test_files = find_test_files("test-ok")?;
     for test_file in test_files {
         let file = fs::read_to_string(&test_file)?;
-        let _program = micko_peg::parse(&file)?;
+        micko_peg::run(&file)?;
     }
     Ok(())
 }
@@ -48,7 +48,7 @@ fn test_synerr() -> Result<(), Box<dyn Error>> {
     let test_files = find_test_files("test-synerr")?;
     for test_file in test_files {
         let file = fs::read_to_string(&test_file)?;
-        let program = micko_peg::parse(&file);
+        let program = micko_peg::run(&file);
         assert!(
             program.is_err(),
             format!("Error not reported for {}", test_file.display())

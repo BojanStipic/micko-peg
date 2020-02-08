@@ -14,16 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-use std::io::Read;
-use std::error::Error;
+use std::io::{self, Read};
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let input = {
-        let mut input = String::new();
-        std::io::stdin().read_to_string(&mut input)?;
-        input
-    };
+fn main() {
+    let mut input = String::new();
+    io::stdin().read_to_string(&mut input).unwrap();
 
-    let _program = micko_peg::parse(&input)?;
-    Ok(())
+    if let Err(e) = micko_peg::run(&input) {
+        eprintln!("{}", e);
+        std::process::exit(1);
+    }
 }
